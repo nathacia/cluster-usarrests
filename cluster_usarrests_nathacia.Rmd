@@ -1,0 +1,104 @@
+---
+title: 'Cluster Analysis: USArrests dataset'
+author: "Nathacia Nathacia"
+date: '2022-11-08'
+output: pdf_document
+---
+
+### Load packages and data
+```{r, results='hide'}
+library(cluster)
+library(factoextra)
+library(car)
+library(dbscan)
+
+data(package='factoextra')
+data(package='datasets')
+data("USArrests")
+
+View(USArrests)
+```
+
+
+### Investigate data
+```{r}
+summary(USArrests)
+str(USArrests)
+head(USArrests)
+tail(USArrests)
+
+pairs(USArrests)
+plot(USArrests[,c(1,2)])
+plot(USArrests[,c(2,3)])
+```
+
+
+### Preprocessing
+```{r}
+d1 <- na.omit(USArrests)
+d1 <- scale(USArrests)
+View(d1)
+```
+
+
+### Distance plot
+```{r}
+d1dist <- get_dist(d1, method = 'euclidian')
+fviz_dist(d1dist)
+
+d1dist <- get_dist(d1, method = 'pearson')
+fviz_dist(d1dist)
+```
+
+
+### Kmeans clustering
+```{r}
+set.seed(123)
+k1 <- kmeans(d1, centers = 5, nstart = 25)
+k1
+fviz_cluster(k1, data = d1)
+
+fviz_nbclust(d1, kmeans, method = 'wss')
+
+k2 <- kmeans(d1, centers = 7, nstart = 25)
+fviz_cluster(k2, data = d1)
+```
+
+
+### Hierarchical clustering
+```{r}
+hdist <- get_dist(d1, method = 'euclidian')
+h1 <- hclust(hdist, method = 'complete')
+plot(h1)
+
+h2 <- agnes(d1, method = 'complete')
+plot(h2)
+
+h3 <- agnes(d1, method = 'single')
+plot(h3)
+
+h4 <- agnes(d1, method = 'average')
+plot(h4)
+
+h2$ac
+h3$ac
+h4$ac
+```
+
+
+### Density based clustering
+```{r}
+db <- dbscan::dbscan(d1, eps = 1.2, minPts = 5)
+fviz_cluster(db, data = d1)
+
+#multishapes[,1:2]
+plot(multishapes[,1:2])
+db1 <- dbscan(multishapes[,1:2], eps = .15, minPts = 5)
+fviz_cluster(db1, data = multishapes[,1:2])
+
+kdense <- kmeans(multishapes[,1:2], centers = 5, nstart = 25)
+fviz_cluster(kdense, data = multishapes[,1:2])
+
+kNNdistplot(multishapes[,1:2], 5)
+abline(h=.15, col='red')
+```
